@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradeLab</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="scanline"></div>
+  <div class="noise"></div>
+
+  <header class="lab-header">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg viewBox="0 0 40 40" width="40" height="40">
+          <polygon points="20,2 38,12 38,28 20,38 2,28 2,12" fill="none" stroke="var(--neon-cyan)" stroke-width="1.5"/>
+          <polygon points="20,8 32,14 32,26 20,32 8,26 8,14" fill="none" stroke="var(--neon-cyan)" stroke-width="0.8" opacity="0.5"/>
+          <circle cx="20" cy="20" r="4" fill="var(--neon-cyan)" opacity="0.8"/>
+          <line x1="20" y1="16" x2="20" y2="8" stroke="var(--neon-cyan)" stroke-width="0.8" opacity="0.6"/>
+          <line x1="23.5" y1="22" x2="32" y2="26" stroke="var(--neon-cyan)" stroke-width="0.8" opacity="0.6"/>
+          <line x1="16.5" y1="22" x2="8" y2="26" stroke="var(--neon-cyan)" stroke-width="0.8" opacity="0.6"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="logo-text">TRADE<span class="accent">LAB</span></h1>
+        <div class="logo-subtitle">GRID TRADING SYSTEM v1.0</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span class="status-text">OFFLINE</span>
+      </div>
+      <div class="mode-badge" id="modeBadge">PAPER
+        <span class="info-tip"><i>i</i><span class="tip-text"><b>Paper mode</b> = simulatie. Er wordt geen echt geld gebruikt. De bot doet alsof hij koopt en verkoopt om de strategie te testen.</span></span>
+      </div>
+      <button class="btn-neon" id="toggleBot">INITIALIZE</button>
+    </div>
+  </header>
+
+  <main class="lab-grid">
+    <!-- Price Display -->
+    <section class="panel panel-price">
+      <div class="panel-header">
+        <span class="panel-icon">&#x25C8;</span>
+        LIVE FEED
+        <span class="info-tip "><i>i</i><span class="tip-text">De huidige Bitcoin prijs in euro's, live opgehaald van Bitvavo. Wordt elke 30 seconden ververst.</span></span>
+      </div>
+      <div class="price-display">
+        <div class="pair-label" id="pairLabel">BTC-EUR</div>
+        <div class="price-value" id="currentPrice">---.--</div>
+        <div class="price-usd" id="priceUsd">≈ $---.--</div>
+        <div class="price-sub">
+          ATR
+          <span class="info-tip"><i>i</i><span class="tip-text"><b>ATR (Average True Range)</b> meet hoe veel de prijs gemiddeld beweegt per uur. Hoe hoger de ATR, hoe volatieler de markt en hoe breder het grid wordt.</span></span>
+          <span id="atrValue">--</span> &nbsp;|&nbsp;
+          Updated <span id="lastUpdate">--:--:--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Portfolio -->
+    <section class="panel panel-portfolio">
+      <div class="panel-header">
+        <span class="panel-icon">&#x25C7;</span>
+        PORTFOLIO
+        <span class="info-tip "><i>i</i><span class="tip-text">Overzicht van je (gesimuleerde) bezittingen. In paper mode start je met een fictief bedrag om de strategie te testen.</span></span>
+      </div>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">EUR BALANCE <span class="info-tip "><i>i</i><span class="tip-text">Je beschikbare euro's. Dit bedrag daalt als de bot BTC koopt en stijgt als de bot BTC verkoopt.</span></span></div>
+          <div class="stat-value" id="balanceEur">€0.00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">BTC BALANCE <span class="info-tip "><i>i</i><span class="tip-text">Je Bitcoin bezit. De 8 decimalen zijn normaal — 0.00010000 BTC is ongeveer €8-9 bij huidige prijzen.</span></span></div>
+          <div class="stat-value btc" id="balanceBtc">0.00000000</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">PORTFOLIO VALUE <span class="info-tip "><i>i</i><span class="tip-text">De totale waarde van alles bij elkaar: je EUR + de huidige waarde van je BTC. Dit schommelt mee met de BTC prijs.</span></span></div>
+          <div class="stat-value" id="portfolioValue">€0.00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">TOTAL P&L <span class="info-tip"><i>i</i><span class="tip-text"><b>P&L = Profit & Loss</b> (winst en verlies). De netto winst na aftrek van Bitvavo fees. Groen = winst, rood = verlies.</span></span></div>
+          <div class="stat-value pnl" id="totalPnl">€0.00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">FEES BETAALD <span class="info-tip"><i>i</i><span class="tip-text"><b>Bitvavo transactiekosten.</b> Per trade betaal je 0.15% maker fee bij zowel de koop als de verkoop. Dit wordt afgetrokken van je P&L.</span></span></div>
+          <div class="stat-value fees" id="totalFees">€0.00</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid Visualization -->
+    <section class="panel panel-grid">
+      <div class="panel-header">
+        <span class="panel-icon">&#x25A6;</span>
+        GRID MAP
+        <span class="info-tip "><i>i</i><span class="tip-text"><b>Het grid</b> is een raster van prijslevels rond de huidige koers. <span style="color:var(--neon-green)">BUY</span> = kooporders onder de prijs, <span style="color:var(--neon-red)">SELL</span> = verkooporders erboven. De bot verdient bij elke op-en-neer beweging.</span></span>
+      </div>
+      <div class="grid-viz" id="gridViz">
+        <div class="grid-empty">Waiting for grid initialization...</div>
+      </div>
+    </section>
+
+    <!-- Open Orders -->
+    <section class="panel panel-orders">
+      <div class="panel-header">
+        <span class="panel-icon">&#x25B7;</span>
+        OPEN ORDERS
+        <span class="info-tip "><i>i</i><span class="tip-text"><b>Open orders</b> zijn orders die nog wachten op uitvoering. Ze worden pas gevuld als de BTC prijs het prijslevel bereikt. <span style="color:var(--neon-green)">BUY</span> = wacht tot prijs daalt, <span style="color:var(--neon-red)">SELL</span> = wacht tot prijs stijgt.</span></span>
+        <span class="order-count" id="orderCount">0</span>
+      </div>
+      <div class="orders-list" id="ordersList">
+        <div class="empty-state">No active orders</div>
+      </div>
+    </section>
+
+    <!-- Trade Log -->
+    <section class="panel panel-trades">
+      <div class="panel-header">
+        <span class="panel-icon">&#x25C9;</span>
+        TRADE LOG
+        <span class="info-tip "><i>i</i><span class="tip-text"><b>Trades</b> zijn afgeronde koop+verkoop paren. De bot koopt op een laag level en verkoopt op een hoger level. Het verschil is je winst per trade.</span></span>
+        <span class="trade-count" id="tradeCount">0</span>
+      </div>
+      <div class="trades-list" id="tradesList">
+        <div class="empty-state">No trades executed yet</div>
+      </div>
+    </section>
+
+    <!-- System Info -->
+    <section class="panel panel-system">
+      <div class="panel-header">
+        <span class="panel-icon">&#x2699;</span>
+        LAB CONFIG
+      </div>
+      <div class="config-list">
+        <div class="config-row">
+          <span class="config-key">Grid Levels <span class="info-tip"><i>i</i><span class="tip-text">Hoeveel prijslevels het grid heeft. Meer levels = vaker kleine trades. Minder levels = minder vaak maar grotere winst per trade.</span></span></span>
+          <span class="config-val" id="cfgLevels">--</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Grid Range <span class="info-tip"><i>i</i><span class="tip-text">Het prijsbereik waarbinnen de bot handelt. Bepaald door de ATR (volatiliteit). Orders buiten dit bereik worden niet geplaatst.</span></span></span>
+          <span class="config-val" id="cfgRange">-- — --</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Grid Interval <span class="info-tip"><i>i</i><span class="tip-text">De afstand in euro's tussen elk grid level. Dit is ook ongeveer de winst per afgeronde trade (koop → verkoop).</span></span></span>
+          <span class="config-val" id="cfgInterval">--</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Order Size <span class="info-tip"><i>i</i><span class="tip-text">Hoeveel euro per order wordt ingezet. Bij 10 levels en €5 per level zit er maximaal €50 in open orders.</span></span></span>
+          <span class="config-val" id="cfgOrderSize">--</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Uptime</span>
+          <span class="config-val" id="cfgUptime">--</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="lab-footer">
+    <span>TradeLab &copy; 2026 &mdash; Experimental Grid Trading System</span>
+    <span class="ws-indicator" id="wsIndicator">&#x25CF; WS DISCONNECTED</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
