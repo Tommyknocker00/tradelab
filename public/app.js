@@ -283,6 +283,32 @@
     }
   });
 
+  const resetBtn = $('#resetBot');
+  resetBtn.addEventListener('click', async () => {
+    if (!confirm('Weet je het zeker? Dit wist alle trades, orders en balans en start opnieuw.')) return;
+
+    resetBtn.disabled = true;
+    resetBtn.textContent = '...';
+
+    try {
+      const res = await fetch('/api/bot/reset', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success) {
+        resetBtn.textContent = 'DONE';
+        setTimeout(() => { resetBtn.textContent = 'RESET'; resetBtn.disabled = false; }, 2000);
+      } else {
+        alert('Reset mislukt: ' + (data.message || 'Onbekende fout'));
+        resetBtn.textContent = 'RESET';
+        resetBtn.disabled = false;
+      }
+    } catch (err) {
+      alert('Reset mislukt — geen verbinding');
+      resetBtn.textContent = 'RESET';
+      resetBtn.disabled = false;
+    }
+  });
+
   // ── Initial load ──
 
   async function init() {
