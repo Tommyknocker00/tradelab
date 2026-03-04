@@ -99,12 +99,22 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 const PORT = config.dashboardPort;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   logger.info(`TradeLab dashboard running on http://localhost:${PORT}`);
   if (config.dashboardPassword) {
     logger.info(`Dashboard password protection: ENABLED (length: ${config.dashboardPassword.length})`);
   } else {
     logger.info('Dashboard password protection: DISABLED (set DASHBOARD_PASSWORD in .env)');
   }
-  logger.info('Waiting for bot start command from dashboard...');
+
+  // Auto-start bot on server boot
+  try {
+    logger.info('Auto-starting bot...');
+    await startBot();
+    logger.info('Bot auto-started successfully');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(`Bot auto-start failed: ${msg}`);
+    logger.info('You can start the bot manually from the dashboard');
+  }
 });

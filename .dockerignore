@@ -1,0 +1,11 @@
+node_modules
+dist
+data
+.env
+*.log
+.git
+.gitignore
+docs
+*.md
+jest.config.js
+src/__tests__
