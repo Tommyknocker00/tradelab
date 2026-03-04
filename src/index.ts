@@ -27,6 +27,14 @@ app.get('/login', (_req, res) => {
 // Auth middleware — protects everything below
 app.use(authMiddleware);
 
+app.use((_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Cloudflare-CDN-Cache-Control', 'no-store');
+  next();
+});
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.get('/api/status', (_req, res) => {
