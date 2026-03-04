@@ -157,14 +157,15 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid var(--neon-yellow);
-  border-radius: 4px;
-  font-size: 0.7rem;
+  padding: 0.3rem 0.6rem;
+  border: none;
+  border-radius: 2px;
+  font-size: 0.6rem;
   font-weight: 600;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.2em;
   color: var(--neon-yellow);
-  background: var(--neon-yellow-dim);
+  background: none;
+  opacity: 0.5;
 }
 
 .mode-badge .info-tip {
@@ -180,9 +181,7 @@ body {
 }
 
 .mode-badge.live {
-  border-color: var(--neon-red);
   color: var(--neon-red);
-  background: var(--neon-red-dim);
 }
 
 .btn-neon {
