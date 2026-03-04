@@ -12,8 +12,12 @@ export function simulateOrderFills(currentPrice: number): void {
   const feeRate = config.makerFeePct / 100;
 
   const ordersToFill = state.openOrders.filter((order) => {
-    if (order.side === 'buy' && currentPrice <= order.price) return true;
-    if (order.side === 'sell' && currentPrice >= order.price) return true;
+    if (order.side === 'buy' && currentPrice <= order.price) {
+      return state.balanceEur >= order.amountEur;
+    }
+    if (order.side === 'sell' && currentPrice >= order.price) {
+      return state.balanceBtc >= order.amountBtc;
+    }
     return false;
   });
 
@@ -27,12 +31,12 @@ export function simulateOrderFills(currentPrice: number): void {
       );
       placeCounterOrder(filled, currentPrice);
     } else {
+      logger.info(
+        `[PAPER] Order gevuld: VERKOOP ${filled.amountBtc.toFixed(8)} BTC @ €${filled.price.toFixed(2)} (fee: ${config.makerFeePct}%)`,
+      );
       const buyOrder = findMatchingBuyOrder(filled);
       if (buyOrder) {
         const trade = recordTrade(buyOrder.price, filled.price, filled.amountBtc, feeRate);
-        logger.info(
-          `[PAPER] Order gevuld: VERKOOP ${filled.amountBtc.toFixed(8)} BTC @ €${filled.price.toFixed(2)} (fee: ${config.makerFeePct}%)`,
-        );
         logger.info(
           `[PAPER] Winst: €${trade.profitEur.toFixed(4)} (fees: €${trade.feesEur.toFixed(4)}) | Totaal P&L: ${state.totalPnl >= 0 ? '+' : ''}€${state.totalPnl.toFixed(4)}`,
         );

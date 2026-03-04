@@ -44,6 +44,19 @@ app.post('/api/bot/start', async (_req, res) => {
   }
 });
 
+app.post('/api/bot/reset', async (_req, res) => {
+  try {
+    await stopBot();
+    const { clearStateFile } = await import('./persistence');
+    clearStateFile();
+    await startBot();
+    res.json({ success: true, message: 'Bot reset — fresh start with €100' });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    res.status(500).json({ success: false, message });
+  }
+});
+
 app.post('/api/bot/stop', async (_req, res) => {
   try {
     await stopBot();
