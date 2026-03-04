@@ -6,7 +6,6 @@
   const $ = (sel) => document.querySelector(sel);
   const statusBadge = $('#statusBadge');
   const statusText = statusBadge.querySelector('.status-text');
-  const modeBadge = $('#modeBadge');
   const toggleBtn = $('#toggleBot');
   const pairLabel = $('#pairLabel');
   const priceEl = $('#currentPrice');
@@ -79,15 +78,6 @@
       statusText.textContent = 'OFFLINE';
       toggleBtn.textContent = 'INITIALIZE';
       toggleBtn.classList.remove('active');
-    }
-
-    // Mode
-    if (data.mode === 'live') {
-      modeBadge.textContent = 'LIVE';
-      modeBadge.classList.add('live');
-    } else {
-      modeBadge.textContent = 'PAPER';
-      modeBadge.classList.remove('live');
     }
 
     // Price
