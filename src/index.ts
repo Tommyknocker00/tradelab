@@ -5,14 +5,28 @@ import path from 'path';
 import { config } from './config';
 import { startBot, stopBot, getBotStatus, botEvents } from './bot';
 import { forceFlush } from './state';
+import { authMiddleware, handleLogin, handleLogout, isWsAuthenticated } from './auth';
 import logger from './logger';
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json());
+
+// Auth routes (before middleware)
+app.post('/api/auth/login', handleLogin);
+app.post('/api/auth/logout', handleLogout);
+
+// Login page served without auth
+app.get('/login', (_req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
+});
+
+// Auth middleware — protects everything below
+app.use(authMiddleware);
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.get('/api/status', (_req, res) => {
   res.json(getBotStatus());
@@ -39,8 +53,13 @@ app.post('/api/bot/stop', async (_req, res) => {
   }
 });
 
-// WebSocket — push updates to connected clients
-wss.on('connection', (ws: WebSocket) => {
+// WebSocket — authenticate and push updates
+wss.on('connection', (ws: WebSocket, req) => {
+  if (!isWsAuthenticated(req.headers.cookie)) {
+    ws.close(1008, 'Not authenticated');
+    return;
+  }
+
   logger.info('Dashboard client connected');
   ws.send(JSON.stringify({ type: 'status', data: getBotStatus() }));
 
@@ -81,5 +100,10 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 const PORT = config.dashboardPort;
 server.listen(PORT, () => {
   logger.info(`TradeLab dashboard running on http://localhost:${PORT}`);
+  if (config.dashboardPassword) {
+    logger.info('Dashboard password protection: ENABLED');
+  } else {
+    logger.info('Dashboard password protection: DISABLED (set DASHBOARD_PASSWORD in .env)');
+  }
   logger.info('Waiting for bot start command from dashboard...');
 });

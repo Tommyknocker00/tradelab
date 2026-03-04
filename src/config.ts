@@ -41,4 +41,6 @@ export const config = {
   },
   makerFeePct: envNum('MAKER_FEE_PCT', 0.15),
   dashboardPort: envNum('DASHBOARD_PORT', 3000),
+  dashboardPassword: env('DASHBOARD_PASSWORD', ''),
+  sessionSecret: env('SESSION_SECRET', ''),
 } as const;
