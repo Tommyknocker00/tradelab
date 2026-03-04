@@ -286,6 +286,9 @@
 
       if (data.success) {
         resetBtn.textContent = 'DONE';
+        const statusRes = await fetch('/api/status');
+        const statusData = await statusRes.json();
+        updateUI(statusData);
         setTimeout(() => { resetBtn.textContent = 'RESET'; resetBtn.disabled = false; }, 2000);
       } else {
         alert('Reset mislukt: ' + (data.message || 'Onbekende fout'));

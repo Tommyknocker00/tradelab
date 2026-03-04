@@ -58,6 +58,7 @@ app.post('/api/bot/reset', async (_req, res) => {
     const { clearStateFile } = await import('./persistence');
     clearStateFile();
     await startBot();
+    botEvents.emit('update');
     res.json({ success: true, message: 'Bot reset — fresh start with €100' });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';

@@ -217,13 +217,14 @@ body {
 .btn-reset {
   border-color: var(--neon-yellow);
   color: var(--neon-yellow);
+  background: var(--neon-yellow-dim);
   font-size: 0.65rem !important;
   padding: 0.5rem 1rem;
 }
 
 .btn-reset:hover {
-  background: var(--neon-yellow-dim) !important;
-  box-shadow: 0 0 10px rgba(255, 204, 0, 0.3) !important;
+  background: rgba(255, 204, 0, 0.25) !important;
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.4) !important;
 }
 
 /* ── Main Grid Layout ── */
