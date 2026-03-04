@@ -45,10 +45,10 @@ function parseCookies(header: string | undefined): Record<string, string> {
 export function checkPassword(password: string): boolean {
   const expected = config.dashboardPassword;
   if (!expected) return false;
-  return crypto.timingSafeEqual(
-    Buffer.from(password),
-    Buffer.from(expected),
-  );
+  const a = Buffer.from(password);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 export function handleLogin(req: Request, res: Response): void {
