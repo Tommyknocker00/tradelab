@@ -9,6 +9,7 @@ import { authMiddleware, handleLogin, handleLogout, isWsAuthenticated } from './
 import logger from './logger';
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
@@ -101,7 +102,7 @@ const PORT = config.dashboardPort;
 server.listen(PORT, () => {
   logger.info(`TradeLab dashboard running on http://localhost:${PORT}`);
   if (config.dashboardPassword) {
-    logger.info('Dashboard password protection: ENABLED');
+    logger.info(`Dashboard password protection: ENABLED (length: ${config.dashboardPassword.length})`);
   } else {
     logger.info('Dashboard password protection: DISABLED (set DASHBOARD_PASSWORD in .env)');
   }

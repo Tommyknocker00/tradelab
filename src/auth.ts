@@ -57,9 +57,14 @@ export function handleLogin(req: Request, res: Response): void {
     return;
   }
 
-  const { password } = req.body;
-  if (!password || !checkPassword(password)) {
-    logger.warn(`Failed login attempt from ${req.ip}`);
+  const { password } = req.body ?? {};
+  if (!password) {
+    logger.warn(`Login attempt with empty body from ${req.ip}`);
+    res.status(401).json({ success: false, message: 'No password provided' });
+    return;
+  }
+  if (!checkPassword(password)) {
+    logger.warn(`Failed login attempt from ${req.ip} (input length: ${password.length}, expected length: ${config.dashboardPassword.length})`);
     res.status(401).json({ success: false, message: 'Incorrect password' });
     return;
   }
@@ -67,8 +72,8 @@ export function handleLogin(req: Request, res: Response): void {
   const token = createToken();
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
-    sameSite: 'strict',
+    secure: req.secure,
+    sameSite: 'lax',
     maxAge: SESSION_MAX_AGE,
   });
 
@@ -97,7 +102,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 
   // Serve login page assets without auth
-  if (req.path === '/login.css') {
+  if (req.path === '/login.css' || req.path === '/favicon.svg') {
     next();
     return;
   }
