@@ -118,6 +118,18 @@
       </div>
     </section>
 
+    <!-- P&L Chart -->
+    <section class="panel panel-chart">
+      <div class="panel-header">
+        <span class="panel-icon">&#x25A3;</span>
+        P&L VERLOOP
+        <span class="info-tip"><i>i</i><span class="tip-text">Cumulatieve winst/verlies over tijd. Groen = winst, rood = verlies. Wordt elke minuut bijgewerkt.</span></span>
+      </div>
+      <div class="chart-container">
+        <canvas id="pnlChart"></canvas>
+      </div>
+    </section>
+
     <!-- Trade Log -->
     <section class="panel panel-trades">
       <div class="panel-header">
@@ -167,6 +179,7 @@
     <span class="ws-indicator" id="wsIndicator">&#x25CF; WS DISCONNECTED</span>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

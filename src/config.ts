@@ -37,7 +37,10 @@ export const config = {
   checkIntervalMinutes: envNum('CHECK_INTERVAL_MINUTES', 60),
   startingBalance: {
     eur: envNum('STARTING_BALANCE_EUR', 100),
+    /** Static BTC amount (legacy). Ignored when btcEur > 0. */
     btc: envNum('STARTING_BALANCE_BTC', 0),
+    /** EUR value to put in BTC — calculated from live price at start/reset. E.g. 50 = €50 worth of BTC. */
+    btcEur: envNum('STARTING_BALANCE_BTC_EUR', 0),
   },
   makerFeePct: envNum('MAKER_FEE_PCT', 0.15),
   dashboardPort: envNum('DASHBOARD_PORT', 3000),

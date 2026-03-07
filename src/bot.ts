@@ -3,7 +3,8 @@ import { config } from './config';
 import { getCandles, getCurrentPrice } from './exchange';
 import { calculateGrid, applyGrid } from './grid';
 import { simulateOrderFills, logPaperStatus } from './paper';
-import { getState, initState, restoreState, forceFlush } from './state';
+import { getState, initState, restoreState, forceFlush, getPortfolioValue } from './state';
+import { appendPnlPoint, clearPnlHistory, getPnlHistory } from './pnlHistory';
 import { stateFileExists } from './persistence';
 import { EventEmitter } from 'events';
 
@@ -29,7 +30,14 @@ export async function startBot(): Promise<void> {
   }
 
   if (!resumed) {
-    const state = initState(config.startingBalance.eur, config.startingBalance.btc);
+    clearPnlHistory();
+    let startBtc = config.startingBalance.btc;
+    if (config.startingBalance.btcEur > 0) {
+      const price = await getCurrentPrice(config.tradingPair);
+      startBtc = config.startingBalance.btcEur / price;
+      logger.info(`Dynamic 50/50: €${config.startingBalance.btcEur} in BTC @ €${price.toFixed(2)} = ${startBtc.toFixed(8)} BTC`);
+    }
+    const state = initState(config.startingBalance.eur, startBtc);
     state.isRunning = true;
   }
 
@@ -90,6 +98,7 @@ async function runGridCycle(): Promise<void> {
   const gridConfig = calculateGrid(price, candles);
   applyGrid(gridConfig, price);
 
+  appendPnlPoint(getState().totalPnl);
   botEvents.emit('update');
 }
 
@@ -104,6 +113,7 @@ async function priceTick(): Promise<void> {
     simulateOrderFills(price);
   }
 
+  appendPnlPoint(getState().totalPnl);
   botEvents.emit('update');
 }
 
@@ -143,6 +153,7 @@ export function getBotStatus() {
       uptime,
       lastGridUpdate: state.lastGridUpdate,
       startedAt: state.startedAt,
+      pnlHistory: getPnlHistory(),
     };
   } catch {
     return {
@@ -162,6 +173,7 @@ export function getBotStatus() {
       uptime: 0,
       lastGridUpdate: null,
       startedAt: null,
+      pnlHistory: [],
     };
   }
 }

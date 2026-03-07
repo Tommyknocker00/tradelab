@@ -134,6 +134,65 @@
     cfgInterval.textContent = data.grid?.interval > 0 ? fmtEur(data.grid.interval) : '--';
     cfgOrderSize.textContent = '€5 / level';
     cfgUptime.textContent = fmtDuration(data.uptime);
+
+    // P&L Chart
+    renderPnlChart(data.pnlHistory || []);
+  }
+
+  // ── P&L Chart ──
+
+  let pnlChart = null;
+
+  function renderPnlChart(history) {
+    const canvas = $('#pnlChart');
+    if (!canvas || typeof Chart === 'undefined') return;
+
+    const labels = history.map(p => new Date(p.t).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }));
+    const values = history.map(p => p.pnl);
+
+    if (pnlChart) {
+      pnlChart.data.labels = labels;
+      pnlChart.data.datasets[0].data = values;
+      pnlChart.update('none');
+      return;
+    }
+
+    pnlChart = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'P&L (€)',
+          data: values,
+          borderColor: '#00f0ff',
+          backgroundColor: 'rgba(0, 240, 255, 0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(26, 26, 46, 0.5)' },
+            ticks: { color: '#6a6a8a', maxTicksLimit: 8 },
+          },
+          y: {
+            grid: { color: 'rgba(26, 26, 46, 0.5)' },
+            ticks: {
+              color: '#6a6a8a',
+              callback: v => '€' + v,
+            },
+          },
+        },
+      },
+    });
   }
 
   // ── Grid visualization ──
