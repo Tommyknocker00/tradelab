@@ -236,6 +236,14 @@ body {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--bg-panel-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alert-method {
+  font-size: 0.65rem;
+  color: var(--text-dim);
 }
 
 /* ── Main Grid Layout ── */

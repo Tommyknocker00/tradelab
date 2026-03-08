@@ -332,29 +332,6 @@
     }
   });
 
-  const testAlertBtn = $('#testAlertBtn');
-  if (testAlertBtn) {
-    testAlertBtn.addEventListener('click', async () => {
-      testAlertBtn.disabled = true;
-      testAlertBtn.textContent = '...';
-      try {
-        const res = await fetch('/api/alerts/test', { method: 'POST' });
-        const data = await res.json();
-        if (data.ok) {
-          testAlertBtn.textContent = 'Verstuurd ✓';
-        } else {
-          alert(data.message || 'Test mislukt');
-          testAlertBtn.textContent = 'Test e-mail';
-        }
-        setTimeout(() => { testAlertBtn.textContent = 'Test e-mail'; testAlertBtn.disabled = false; }, 2000);
-      } catch (err) {
-        alert('Verbinding mislukt');
-        testAlertBtn.textContent = 'Test e-mail';
-        testAlertBtn.disabled = false;
-      }
-    });
-  }
-
   const resetBtn = $('#resetBot');
   resetBtn.addEventListener('click', async () => {
     if (!confirm('Weet je het zeker? Dit wist alle trades, orders en balans en start opnieuw.')) return;
@@ -396,12 +373,6 @@
       const data = await res.json();
       updateUI(data);
 
-      const methodRes = await fetch('/api/alerts/config');
-      if (methodRes.ok) {
-        const { method } = await methodRes.json();
-        const methodEl = $('#alertMethod');
-        if (methodEl) methodEl.textContent = method === 'resend' ? '(Resend)' : method === 'smtp' ? '(SMTP)' : '';
-      }
     } catch { /* server not ready yet */ }
 
     connectWS();
