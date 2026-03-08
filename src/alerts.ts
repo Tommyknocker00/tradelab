@@ -14,11 +14,8 @@ function shouldAlert(type: string): boolean {
 }
 
 function hasEmailConfig(): boolean {
-  return Boolean(
-    config.alertEmail?.trim() &&
-      config.smtp.user?.trim() &&
-      config.smtp.pass?.trim()
-  );
+  if (!config.alertEmail?.trim()) return false;
+  return Boolean(config.resendApiKey?.trim() || (config.smtp.user?.trim() && config.smtp.pass?.trim()));
 }
 
 export function hasAlertsEnabled(): boolean {
@@ -27,7 +24,7 @@ export function hasAlertsEnabled(): boolean {
 
 export async function sendTestAlert(): Promise<{ ok: boolean; message: string }> {
   if (!hasEmailConfig()) {
-    return { ok: false, message: 'E-mail niet geconfigureerd. Vul ALERT_EMAIL, SMTP_USER en SMTP_PASS in.' };
+    return { ok: false, message: 'E-mail niet geconfigureerd. Vul ALERT_EMAIL in plus SMTP_USER+SMTP_PASS óf RESEND_API_KEY.' };
   }
   try {
     await sendEmail('TradeLab: Testmelding', `
@@ -48,22 +45,42 @@ export async function sendTestAlert(): Promise<{ ok: boolean; message: string }>
 
 async function sendEmail(subject: string, html: string): Promise<void> {
   if (!hasEmailConfig()) return;
-  try {
-    const transporter = nodemailer.createTransport({
-      host: config.smtp.host,
-      port: config.smtp.port,
-      secure: config.smtp.port === 465,
-      auth: { user: config.smtp.user, pass: config.smtp.pass },
+
+  // Resend (HTTPS) — werkt beter vanaf VPS dan SMTP
+  if (config.resendApiKey?.trim()) {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${config.resendApiKey}`,
+      },
+      body: JSON.stringify({
+        from: 'TradeLab <onboarding@resend.dev>',
+        to: [config.alertEmail],
+        subject,
+        html,
+      }),
     });
-    await transporter.sendMail({
-      from: `TradeLab <${config.smtp.user}>`,
-      to: config.alertEmail,
-      subject,
-      html,
-    });
-  } catch (err) {
-    logger.warn(`Email alert failed: ${err}`);
+    const data = await res.json() as { id?: string; message?: string };
+    if (!res.ok) throw new Error(data.message || `Resend ${res.status}`);
+    return;
   }
+
+  // SMTP (Outlook/Hotmail)
+  const transporter = nodemailer.createTransport({
+    host: config.smtp.host,
+    port: config.smtp.port,
+    secure: config.smtp.port === 465,
+    requireTLS: config.smtp.port === 587,
+    auth: { user: config.smtp.user, pass: config.smtp.pass },
+    connectionTimeout: 15000,
+  });
+  await transporter.sendMail({
+    from: `TradeLab <${config.smtp.user}>`,
+    to: config.alertEmail,
+    subject,
+    html,
+  });
 }
 
 async function postWebhook(text: string, extra: Record<string, unknown> = {}): Promise<void> {
@@ -93,7 +110,7 @@ export async function alertLowEur(balanceEur: number, orderSize: number): Promis
   logger.warn(msg);
   await postWebhook(msg, { type: 'low_eur', balanceEur, orderSizeEur: orderSize });
   if (hasEmailConfig()) {
-    await sendEmail('TradeLab: EUR balans te laag', `
+    try { await sendEmail('TradeLab: EUR balans te laag', `
       <h2>TradeLab Alert</h2>
       <p><strong>Probleem:</strong> Je EUR balans is te laag (€${balanceEur.toFixed(2)}). Voor een order is minimaal €${orderSize} nodig. De bot kan geen kooporders meer plaatsen.</p>
       <p><strong>Wat te doen:</strong></p>
@@ -102,7 +119,7 @@ export async function alertLowEur(balanceEur: number, orderSize: number): Promis
         <li>Verkoop wat BTC voor EUR via Bitvavo om de balans aan te vullen.</li>
       </ul>
       <p>Na het verhogen van je EUR balans herstelt de bot zich automatisch.</p>
-    `);
+    `); } catch (e) { logger.warn(`Email alert failed: ${e}`); }
   }
 }
 
@@ -112,7 +129,7 @@ export async function alertLowBtc(balanceBtc: number, btcValueEur: number, order
   logger.warn(msg);
   await postWebhook(msg, { type: 'low_btc', balanceBtc, btcValueEur, orderSizeEur: orderSize });
   if (hasEmailConfig()) {
-    await sendEmail('TradeLab: BTC balans te laag', `
+    try { await sendEmail('TradeLab: BTC balans te laag', `
       <h2>TradeLab Alert</h2>
       <p><strong>Probleem:</strong> Je BTC balans is te laag (€${btcValueEur.toFixed(2)} waard). Voor een order is minimaal €${orderSize} nodig. De bot kan geen verkooporders meer plaatsen.</p>
       <p><strong>Wat te doen:</strong></p>
@@ -121,7 +138,7 @@ export async function alertLowBtc(balanceBtc: number, btcValueEur: number, order
         <li>Verlaag je ORDER_SIZE_EUR in de config zodat de huidige BTC genoeg is.</li>
       </ul>
       <p>Bij paper trading: druk op <strong>RESET</strong> in het dashboard om opnieuw te beginnen met een 50/50 balans.</p>
-    `);
+    `); } catch (e) { logger.warn(`Email alert failed: ${e}`); }
   }
 }
 
@@ -131,7 +148,7 @@ export async function alertApiError(operation: string, error: string): Promise<v
   logger.error(msg);
   await postWebhook(msg, { type: 'api_error', operation, error });
   if (hasEmailConfig()) {
-    await sendEmail('TradeLab: API fout', `
+    try { await sendEmail('TradeLab: API fout', `
       <h2>TradeLab Alert</h2>
       <p><strong>Probleem:</strong> Er ging iets mis bij ${operation}: ${error}</p>
       <p><strong>Wat te doen:</strong></p>
@@ -140,6 +157,6 @@ export async function alertApiError(operation: string, error: string): Promise<v
         <li>Check of je API keys nog geldig zijn (Bitvavo → Instellingen → API).</li>
         <li>Herstart de bot via het dashboard of de server.</li>
       </ul>
-    `);
+    `); } catch (e) { logger.warn(`Email alert failed: ${e}`); }
   }
 }

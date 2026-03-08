@@ -50,12 +50,13 @@ Alle configuratie gaat via het `.env` bestand in de project root. Kopieer `.env.
 
 | Variabele | Type | Default | Uitleg |
 |-----------|------|---------|--------|
-| `ALERT_EMAIL` | string | `""` | E-mailadres voor meldingen. Vereist SMTP-configuratie. |
-| `SMTP_HOST` | string | `smtp.office365.com` | SMTP server (Outlook/Hotmail standaard). |
+| `ALERT_EMAIL` | string | `""` | E-mailadres voor meldingen. |
+| `RESEND_API_KEY` | string | `""` | **Aanbevolen op VPS.** Resend API key (resend.com). Gebruikt HTTPS i.p.v. SMTP — werkt beter als je host SMTP blokkeert. 100 e-mails/dag gratis. |
+| `SMTP_HOST` | string | `smtp.office365.com` | SMTP server (Outlook/Hotmail). Alleen nodig als je geen Resend gebruikt. |
 | `SMTP_PORT` | number | `587` | SMTP poort. |
-| `SMTP_USER` | string | `""` | SMTP inlognaam (bijv. je e-mailadres). |
-| `SMTP_PASS` | string | `""` | SMTP wachtwoord. **Hotmail/Outlook:** gebruik een app-wachtwoord (Microsoft-account → Beveiliging), niet je normale wachtwoord. |
-| `ALERT_WEBHOOK_URL` | string | `""` | Optioneel: webhook (Discord, ntfy.sh). Leeg = geen webhook. |
+| `SMTP_USER` | string | `""` | SMTP inlognaam. |
+| `SMTP_PASS` | string | `""` | SMTP wachtwoord. **Hotmail/Outlook:** app-wachtwoord vereist (Microsoft-account → Beveiliging). |
+| `ALERT_WEBHOOK_URL` | string | `""` | Optioneel: webhook (Discord, ntfy.sh). |
 
 **Wanneer krijg je een alert?**
 - **EUR balans laag** — minder dan 2× ordergrootte (geen kooporders meer mogelijk)
@@ -64,9 +65,10 @@ Alle configuratie gaat via het `.env` bestand in de project root. Kopieer `.env.
 
 Elk alerttype wordt maximaal 1× per uur verstuurd. De e-mail bevat steeds **wat het probleem is** en **wat je moet doen** (bijv. balans verhogen, RESET drukken, of de bot herstarten).
 
-**E-mail (Hotmail/Outlook):**
-1. Maak een app-wachtwoord aan: [account.microsoft.com](https://account.microsoft.com) → Beveiliging → Geavanceerde beveiligingsopties → App-wachtwoorden.
-2. Vul `ALERT_EMAIL`, `SMTP_USER` (je e-mail) en `SMTP_PASS` (het app-wachtwoord) in.
+**E-mail — kies één methode:**
+
+- **Resend (aanbevolen op VPS):** Account op [resend.com](https://resend.com), API key aanmaken. Vul `ALERT_EMAIL` en `RESEND_API_KEY` in. Geen domain verificatie nodig.
+- **SMTP (Hotmail/Outlook):** App-wachtwoord aanmaken via Microsoft-account. Vul `ALERT_EMAIL`, `SMTP_USER`, `SMTP_PASS` in. Sommige VPS/hosts blokkeren SMTP — dan Resend gebruiken.
 
 ## Voorbeeldconfiguraties
 

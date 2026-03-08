@@ -48,8 +48,10 @@ export const config = {
   sessionSecret: env('SESSION_SECRET', ''),
   /** Webhook URL voor alerts (Discord, ntfy.sh, etc). Leeg = geen webhook. */
   alertWebhookUrl: env('ALERT_WEBHOOK_URL', ''),
-  /** E-mailadres voor alerts. Leeg = geen e-mailmeldingen. Vereist SMTP_* variabelen. */
+  /** E-mailadres voor alerts. Leeg = geen e-mailmeldingen. */
   alertEmail: env('ALERT_EMAIL', ''),
+  /** Resend API key (https://resend.com). Gebruikt HTTPS in plaats van SMTP — werkt beter vanaf VPS. 100 e-mails/dag gratis. */
+  resendApiKey: env('RESEND_API_KEY', ''),
   smtp: {
     host: env('SMTP_HOST', 'smtp.office365.com'),
     port: envNum('SMTP_PORT', 587),
