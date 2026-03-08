@@ -46,4 +46,14 @@ export const config = {
   dashboardPort: envNum('DASHBOARD_PORT', 3000),
   dashboardPassword: env('DASHBOARD_PASSWORD', ''),
   sessionSecret: env('SESSION_SECRET', ''),
+  /** Webhook URL voor alerts (Discord, ntfy.sh, etc). Leeg = geen webhook. */
+  alertWebhookUrl: env('ALERT_WEBHOOK_URL', ''),
+  /** E-mailadres voor alerts. Leeg = geen e-mailmeldingen. Vereist SMTP_* variabelen. */
+  alertEmail: env('ALERT_EMAIL', ''),
+  smtp: {
+    host: env('SMTP_HOST', 'smtp.office365.com'),
+    port: envNum('SMTP_PORT', 587),
+    user: env('SMTP_USER', ''),
+    pass: env('SMTP_PASS', ''),
+  },
 } as const;

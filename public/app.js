@@ -71,12 +71,12 @@
     if (botRunning) {
       statusBadge.classList.add('running');
       statusText.textContent = 'RUNNING';
-      toggleBtn.textContent = 'TERMINATE';
+      toggleBtn.textContent = 'PAUSE';
       toggleBtn.classList.add('active');
     } else {
       statusBadge.classList.remove('running');
       statusText.textContent = 'OFFLINE';
-      toggleBtn.textContent = 'INITIALIZE';
+      toggleBtn.textContent = 'START';
       toggleBtn.classList.remove('active');
     }
 
@@ -331,6 +331,29 @@
       toggleBtn.disabled = false;
     }
   });
+
+  const testAlertBtn = $('#testAlertBtn');
+  if (testAlertBtn) {
+    testAlertBtn.addEventListener('click', async () => {
+      testAlertBtn.disabled = true;
+      testAlertBtn.textContent = '...';
+      try {
+        const res = await fetch('/api/alerts/test', { method: 'POST' });
+        const data = await res.json();
+        if (data.ok) {
+          testAlertBtn.textContent = 'Verstuurd ✓';
+        } else {
+          alert(data.message || 'Test mislukt');
+          testAlertBtn.textContent = 'Test e-mail';
+        }
+        setTimeout(() => { testAlertBtn.textContent = 'Test e-mail'; testAlertBtn.disabled = false; }, 2000);
+      } catch (err) {
+        alert('Verbinding mislukt');
+        testAlertBtn.textContent = 'Test e-mail';
+        testAlertBtn.disabled = false;
+      }
+    });
+  }
 
   const resetBtn = $('#resetBot');
   resetBtn.addEventListener('click', async () => {

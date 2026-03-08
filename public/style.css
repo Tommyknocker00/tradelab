@@ -227,6 +227,17 @@ body {
   box-shadow: 0 0 10px rgba(255, 204, 0, 0.4) !important;
 }
 
+.btn-small {
+  font-size: 0.65rem !important;
+  padding: 0.4rem 0.8rem;
+}
+
+.config-actions {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bg-panel-border);
+}
+
 /* ── Main Grid Layout ── */
 
 .lab-grid {

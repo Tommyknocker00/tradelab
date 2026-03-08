@@ -3,7 +3,8 @@ import { config } from './config';
 import { getCandles, getCurrentPrice } from './exchange';
 import { calculateGrid, applyGrid } from './grid';
 import { simulateOrderFills, logPaperStatus } from './paper';
-import { getState, initState, restoreState, forceFlush, getPortfolioValue } from './state';
+import { getState, initState, restoreState, forceFlush } from './state';
+import { alertLowEur, alertLowBtc, alertApiError, hasAlertsEnabled } from './alerts';
 import { appendPnlPoint, clearPnlHistory, getPnlHistory } from './pnlHistory';
 import { stateFileExists } from './persistence';
 import { EventEmitter } from 'events';
@@ -57,7 +58,9 @@ export async function startBot(): Promise<void> {
     try {
       await priceTick();
     } catch (err) {
-      logger.error(`Price tick error: ${err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      logger.error(`Price tick error: ${msg}`);
+      if (hasAlertsEnabled()) await alertApiError('price_tick', msg);
     }
   }, 30_000);
 
@@ -67,7 +70,9 @@ export async function startBot(): Promise<void> {
     try {
       await runGridCycle();
     } catch (err) {
-      logger.error(`Grid cycle error: ${err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      logger.error(`Grid cycle error: ${msg}`);
+      if (hasAlertsEnabled()) await alertApiError('grid_cycle', msg);
     }
   }, gridMs);
 
@@ -99,7 +104,23 @@ async function runGridCycle(): Promise<void> {
   applyGrid(gridConfig, price);
 
   appendPnlPoint(getState().totalPnl);
+  await checkBalanceAlerts();
   botEvents.emit('update');
+}
+
+async function checkBalanceAlerts(): Promise<void> {
+  if (!hasAlertsEnabled()) return;
+  const state = getState();
+  const minEur = config.orderSizeEur * 2;
+  const minBtcValueEur = config.orderSizeEur * 2;
+  const btcValueEur = state.balanceBtc * state.currentPrice;
+
+  if (state.balanceEur < minEur) {
+    await alertLowEur(state.balanceEur, config.orderSizeEur);
+  }
+  if (btcValueEur < minBtcValueEur && state.balanceBtc > 0) {
+    await alertLowBtc(state.balanceBtc, btcValueEur, config.orderSizeEur);
+  }
 }
 
 async function priceTick(): Promise<void> {
@@ -114,6 +135,7 @@ async function priceTick(): Promise<void> {
   }
 
   appendPnlPoint(getState().totalPnl);
+  await checkBalanceAlerts();
   botEvents.emit('update');
 }
 

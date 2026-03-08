@@ -35,13 +35,38 @@ Alle configuratie gaat via het `.env` bestand in de project root. Kopieer `.env.
 | Variabele | Type | Default | Uitleg |
 |-----------|------|---------|--------|
 | `STARTING_BALANCE_EUR` | number | `100` | Startbalans EUR voor simulatie. |
-| `STARTING_BALANCE_BTC` | number | `0` | Startbalans BTC voor simulatie. |
+| `STARTING_BALANCE_BTC_EUR` | number | `0` | Start met X euro aan BTC (berekend op live koers bij reset/start). 50/50 = zet gelijk aan EUR. |
+| `STARTING_BALANCE_BTC` | number | `0` | Alleen als BTC_EUR=0: vaste BTC hoeveelheid. Anders genegeerd. |
 
 ### Dashboard
 
 | Variabele | Type | Default | Uitleg |
 |-----------|------|---------|--------|
 | `DASHBOARD_PORT` | number | `3000` | Poort waarop het web dashboard draait. |
+| `DASHBOARD_PASSWORD` | string | `""` | Wachtwoord voor het dashboard. Vermijd `#` in het wachtwoord (wordt als comment gezien). |
+| `SESSION_SECRET` | string | `""` | Geheime string voor sessie-cookies. Gebruik een lange random string. |
+
+### Alerts
+
+| Variabele | Type | Default | Uitleg |
+|-----------|------|---------|--------|
+| `ALERT_EMAIL` | string | `""` | E-mailadres voor meldingen. Vereist SMTP-configuratie. |
+| `SMTP_HOST` | string | `smtp.office365.com` | SMTP server (Outlook/Hotmail standaard). |
+| `SMTP_PORT` | number | `587` | SMTP poort. |
+| `SMTP_USER` | string | `""` | SMTP inlognaam (bijv. je e-mailadres). |
+| `SMTP_PASS` | string | `""` | SMTP wachtwoord. **Hotmail/Outlook:** gebruik een app-wachtwoord (Microsoft-account → Beveiliging), niet je normale wachtwoord. |
+| `ALERT_WEBHOOK_URL` | string | `""` | Optioneel: webhook (Discord, ntfy.sh). Leeg = geen webhook. |
+
+**Wanneer krijg je een alert?**
+- **EUR balans laag** — minder dan 2× ordergrootte (geen kooporders meer mogelijk)
+- **BTC balans laag** — BTC-waarde < 2× ordergrootte (geen verkooporders meer mogelijk)
+- **API fout** — bij fouten bij prijs ophalen of grid-update
+
+Elk alerttype wordt maximaal 1× per uur verstuurd. De e-mail bevat steeds **wat het probleem is** en **wat je moet doen** (bijv. balans verhogen, RESET drukken, of de bot herstarten).
+
+**E-mail (Hotmail/Outlook):**
+1. Maak een app-wachtwoord aan: [account.microsoft.com](https://account.microsoft.com) → Beveiliging → Geavanceerde beveiligingsopties → App-wachtwoorden.
+2. Vul `ALERT_EMAIL`, `SMTP_USER` (je e-mail) en `SMTP_PASS` (het app-wachtwoord) in.
 
 ## Voorbeeldconfiguraties
 

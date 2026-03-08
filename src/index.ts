@@ -6,6 +6,7 @@ import { config } from './config';
 import { startBot, stopBot, getBotStatus, botEvents } from './bot';
 import { forceFlush } from './state';
 import { authMiddleware, handleLogin, handleLogout, isWsAuthenticated } from './auth';
+import { sendTestAlert } from './alerts';
 import logger from './logger';
 
 const app = express();
@@ -73,6 +74,15 @@ app.post('/api/bot/stop', async (_req, res) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     res.status(500).json({ success: false, message });
+  }
+});
+
+app.post('/api/alerts/test', async (_req, res) => {
+  try {
+    const result = await sendTestAlert();
+    res.json(result);
+  } catch {
+    res.status(500).json({ ok: false, message: 'Onbekende fout' });
   }
 });
 
