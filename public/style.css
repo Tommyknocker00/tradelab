@@ -374,10 +374,6 @@ body {
   border: 1px solid var(--bg-panel-border);
 }
 
-.pnl-highlight.pnl-bottom {
-  margin-bottom: 0;
-  margin-top: 0.75rem;
-}
 
 .pnl-label {
   display: block;

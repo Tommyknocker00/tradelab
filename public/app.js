@@ -117,18 +117,14 @@
     else if (pnl < 0) pnlEl.classList.add('negative');
 
     const pnlTop = $('#pnlValueTop');
-    const pnlBottom = $('#pnlValueBottom');
     const pnlTopBox = $('#pnlHighlightTop');
-    const pnlBottomBox = $('#pnlHighlightBottom');
     if (pnlTop) pnlTop.textContent = pnlStr;
-    if (pnlBottom) pnlBottom.textContent = pnlStr;
-    [pnlTopBox, pnlBottomBox].forEach((el) => {
-      if (!el) return;
-      el.classList.remove('positive', 'negative', 'neutral');
-      if (pnl > 0) el.classList.add('positive');
-      else if (pnl < 0) el.classList.add('negative');
-      else el.classList.add('neutral');
-    });
+    if (pnlTopBox) {
+      pnlTopBox.classList.remove('positive', 'negative', 'neutral');
+      if (pnl > 0) pnlTopBox.classList.add('positive');
+      else if (pnl < 0) pnlTopBox.classList.add('negative');
+      else pnlTopBox.classList.add('neutral');
+    }
 
     feesEl.textContent = fmtEur(data.totalFees || 0);
 
