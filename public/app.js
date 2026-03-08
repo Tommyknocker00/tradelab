@@ -143,7 +143,7 @@
       ? `${fmtEur(data.grid.low)} — ${fmtEur(data.grid.high)}`
       : '-- — --';
     cfgInterval.textContent = data.grid?.interval > 0 ? fmtEur(data.grid.interval) : '--';
-    cfgOrderSize.textContent = '€5 / level';
+    cfgOrderSize.textContent = data.grid?.orderSizeEur != null ? `€${data.grid.orderSizeEur} / level` : '--';
     cfgUptime.textContent = fmtDuration(data.uptime);
 
     // P&L Chart
