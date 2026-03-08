@@ -29,12 +29,12 @@ export const config = {
   tradingPair: env('TRADING_PAIR', 'BTC-EUR'),
   paperTrading: envBool('PAPER_TRADING', true),
   grid: {
-    levels: envNum('GRID_LEVELS', 10),
+    levels: envNum('GRID_LEVELS', 6),
     atrPeriod: envNum('GRID_ATR_PERIOD', 14),
-    atrMultiplier: envNum('GRID_ATR_MULTIPLIER', 1.5),
+    atrMultiplier: envNum('GRID_ATR_MULTIPLIER', 2.0),
   },
-  orderSizeEur: envNum('ORDER_SIZE_EUR', 5),
-  checkIntervalMinutes: envNum('CHECK_INTERVAL_MINUTES', 60),
+  orderSizeEur: envNum('ORDER_SIZE_EUR', 10),
+  checkIntervalMinutes: envNum('CHECK_INTERVAL_MINUTES', 120),
   startingBalance: {
     eur: envNum('STARTING_BALANCE_EUR', 100),
     /** Static BTC amount (legacy). Ignored when btcEur > 0. */

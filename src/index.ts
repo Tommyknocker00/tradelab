@@ -60,7 +60,12 @@ app.post('/api/bot/reset', async (_req, res) => {
     clearStateFile();
     await startBot();
     botEvents.emit('update');
-    res.json({ success: true, message: 'Bot reset — fresh start with €100' });
+    const eur = config.startingBalance.eur;
+    const btcEur = config.startingBalance.btcEur;
+    const msg = btcEur > 0
+      ? `Bot reset — fresh 50/50 start (€${eur} + €${btcEur} BTC)`
+      : `Bot reset — fresh start with €${eur}`;
+    res.json({ success: true, message: msg });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     res.status(500).json({ success: false, message });

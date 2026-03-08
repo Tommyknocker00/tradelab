@@ -19,16 +19,16 @@ Alle configuratie gaat via het `.env` bestand in de project root. Kopieer `.env.
 |-----------|------|---------|--------|
 | `TRADING_PAIR` | string | `BTC-EUR` | Market pair. Bitvavo notatie: `BTC-EUR`, `ETH-EUR`, etc. |
 | `PAPER_TRADING` | boolean | `true` | `true` = simulatie (geen echte orders). `false` = live orders via Bitvavo. |
-| `ORDER_SIZE_EUR` | number | `5` | Hoeveel EUR per grid order. Bij 10 levels = max €50 aan open orders. |
+| `ORDER_SIZE_EUR` | number | `10` | Hoeveel EUR per grid order. Lager = meer orders mogelijk met zelfde EUR (bij beperkt budget). |
 
 ### Grid Instellingen
 
 | Variabele | Type | Default | Uitleg |
 |-----------|------|---------|--------|
-| `GRID_LEVELS` | number | `10` | Aantal grid levels boven + onder de prijs. Meer = vaker trades maar kleiner per stuk. |
+| `GRID_LEVELS` | number | `6` | Aantal grid levels boven + onder de prijs. Minder = rustiger, EUR gaat langer mee. |
 | `GRID_ATR_PERIOD` | number | `14` | Hoeveel candles voor de ATR berekening. Standaard 14 candles van 1 uur = ~14 uur terugkijken. |
-| `GRID_ATR_MULTIPLIER` | number | `1.5` | Grid range = `prijs ± (ATR × multiplier)`. Hoger = breder grid. |
-| `CHECK_INTERVAL_MINUTES` | number | `60` | Hoe vaak het grid opnieuw berekend wordt (in minuten). De prijs wordt los daarvan elke 30 seconden gecheckt voor paper fills. |
+| `GRID_ATR_MULTIPLIER` | number | `2.0` | Grid range = `prijs ± (ATR × multiplier)`. Hoger = breder grid, minder fills, winstgevender per trade. |
+| `CHECK_INTERVAL_MINUTES` | number | `120` | Hoe vaak het grid opnieuw berekend wordt. Hoger = minder vaak, EUR verbruik spreidt zich. |
 
 ### Paper Trading
 
@@ -72,6 +72,17 @@ Elk alerttype wordt maximaal 1× per uur verstuurd. De e-mail bevat steeds **wat
 
 ## Voorbeeldconfiguraties
 
+### Beperkt budget (€100/maand bijstorten)
+
+```env
+GRID_LEVELS=6
+GRID_ATR_MULTIPLIER=2.0
+ORDER_SIZE_EUR=10
+CHECK_INTERVAL_MINUTES=120
+```
+
+Kleine orders, breed grid, trage grid-updates. EUR gaat langer mee; bij daling loop je minder snel leeg. Geen EUR meer? De bot wacht tot sells vullen (BTC → EUR), daarna kan hij weer kopen.
+
 ### Conservatief (breed grid, weinig exposure)
 
 ```env
@@ -81,7 +92,7 @@ ORDER_SIZE_EUR=3
 CHECK_INTERVAL_MINUTES=120
 ```
 
-Breed grid, minder trades, kleiner risico. Goed voor beginnen.
+Breed grid, minimale orders. Zeer klein risico per trade.
 
 ### Agressief (smal grid, veel trades)
 

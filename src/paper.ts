@@ -22,6 +22,10 @@ export function simulateOrderFills(currentPrice: number): void {
   });
 
   for (const order of ordersToFill) {
+    const stateNow = getState();
+    if (order.side === 'buy' && stateNow.balanceEur < order.amountEur) continue;
+    if (order.side === 'sell' && stateNow.balanceBtc < order.amountBtc) continue;
+
     const filled = fillOrder(order.id, currentPrice, feeRate);
     if (!filled) continue;
 
