@@ -154,11 +154,31 @@
 
   let pnlChart = null;
 
+  function pnlChartLabel(timestamp, history) {
+    if (!history.length) return '';
+    const d = new Date(timestamp);
+    const first = new Date(history[0].t).getTime();
+    const last = new Date(history[history.length - 1].t).getTime();
+    const spanMs = last - first;
+    const spanDays = spanMs / (24 * 60 * 60 * 1000);
+
+    if (spanDays < 1) {
+      return d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    }
+    if (spanDays < 7) {
+      return d.toLocaleDateString('nl-NL', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+    }
+    if (spanDays < 31) {
+      return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+    }
+    return d.toLocaleDateString('nl-NL', { month: 'short', year: '2-digit' });
+  }
+
   function renderPnlChart(history) {
     const canvas = $('#pnlChart');
     if (!canvas || typeof Chart === 'undefined') return;
 
-    const labels = history.map(p => new Date(p.t).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }));
+    const labels = history.map(p => pnlChartLabel(p.t, history));
     const values = history.map(p => p.pnl);
 
     if (pnlChart) {
