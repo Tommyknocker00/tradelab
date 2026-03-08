@@ -395,6 +395,13 @@
       }
       const data = await res.json();
       updateUI(data);
+
+      const methodRes = await fetch('/api/alerts/config');
+      if (methodRes.ok) {
+        const { method } = await methodRes.json();
+        const methodEl = $('#alertMethod');
+        if (methodEl) methodEl.textContent = method === 'resend' ? '(Resend)' : method === 'smtp' ? '(SMTP)' : '';
+      }
     } catch { /* server not ready yet */ }
 
     connectWS();

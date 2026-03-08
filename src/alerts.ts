@@ -39,8 +39,19 @@ export async function sendTestAlert(): Promise<{ ok: boolean; message: string }>
     return { ok: true, message: 'Test-e-mail verstuurd naar ' + config.alertEmail };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    return { ok: false, message: 'Verzenden mislukt: ' + msg };
+    const hint = msg.includes('535') && msg.includes('Authentication')
+      ? '\n\n→ Voeg RESEND_API_KEY toe in Dokploy (Environment Variables) en verwijder SMTP_* variabelen. Resend werkt zonder Microsoft-login.'
+      : '';
+    return { ok: false, message: 'Verzenden mislukt: ' + msg + hint };
   }
+}
+
+/** Welke e-mailmethode is actief? Voor debug. */
+export function getEmailMethod(): 'resend' | 'smtp' | 'none' {
+  if (!config.alertEmail?.trim()) return 'none';
+  if (config.resendApiKey?.trim()) return 'resend';
+  if (config.smtp.user?.trim() && config.smtp.pass?.trim()) return 'smtp';
+  return 'none';
 }
 
 async function sendEmail(subject: string, html: string): Promise<void> {

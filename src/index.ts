@@ -6,7 +6,7 @@ import { config } from './config';
 import { startBot, stopBot, getBotStatus, botEvents } from './bot';
 import { forceFlush } from './state';
 import { authMiddleware, handleLogin, handleLogout, isWsAuthenticated } from './auth';
-import { sendTestAlert } from './alerts';
+import { sendTestAlert, getEmailMethod } from './alerts';
 import logger from './logger';
 
 const app = express();
@@ -77,9 +77,15 @@ app.post('/api/bot/stop', async (_req, res) => {
   }
 });
 
+app.get('/api/alerts/config', (_req, res) => {
+  res.json({ method: getEmailMethod(), email: config.alertEmail || null });
+});
+
 app.post('/api/alerts/test', async (_req, res) => {
   try {
     const result = await sendTestAlert();
+    const method = getEmailMethod();
+    if (result.ok) result.message += ` (via ${method})`;
     res.json(result);
   } catch {
     res.status(500).json({ ok: false, message: 'Onbekende fout' });
